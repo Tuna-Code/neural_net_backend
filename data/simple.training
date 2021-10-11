@@ -1,0 +1,8 @@
+# Network Training data in CSV Format
+## First N inputs are for first N nodes in input layer
+## Last P outputs are for expected outs from P nodes in output layer
+## Each line is new input
+## Example for network with 3 input nodes and 2 output nodes (spaces and non-numericals are ignored):
+## in_1,in_2,in_3,out_1,out_2
+3,1,1,0
+-1,4,0,1
