@@ -58,7 +58,61 @@ void NNet::forwardProp(){
 void NNet::backProp(){
     Layer* cur = outputLayer;
 
+    
     while(cur != inputLayer){
+
+        // Backprop for CE Error and various layers (very-simple site)
+        // https://www.ics.uci.edu/~pjsadows/notes.pdf
+
+        if(errorFunc == "CE"){
+
+            if(cur->actvFunc == "Softmax"){
+                
+               
+                
+                // Compute gradient out/in
+                // Compute denominator for softmax deriv
+                for(int i = 0; i < cur->numNodes; i++){
+                    cur->gradOutput[i] = -1.0*(expectedOutput[i]/cur->output[i]);
+                    
+                    if(i == cur->numNodes - 1){
+                        cur->gradInput[i] = cur->output[i]*(1 - cur->output[i]);
+                    }
+                    else{
+                        
+                        cur->gradInput[i] = -1*(cur->output[i]*cur->output[cur->numNodes-1]);
+                    }
+                }
+                
+
+
+
+
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     /// ---------------- Working simple backprop for sigmoid only and SOS error
+
         //cout <<"\n-----------\n" << "Layer: " << cur-> num << endl;
         // If current layer has sigmoud output
         if(cur->actvFunc == "Sigmoid" && errorFunc == "SOS"){
@@ -267,8 +321,22 @@ void NNet::compError(){
             expOut = expectedOutput[i];
             out = output->output[i];
             
-            curEntropyError = (expOut*log10(out)) + ((1 - expOut)*log((1 - out)));
-            cout << curEntropyError << endl;
+            //curEntropyError = (expOut*log10(out)) + ((1 - expOut)*log((1 - out)));
+            
+            //if(expOut != 0){
+                //curEntropyError += expOut*log10(out);
+                //if(expOut == 1){
+                 //   curEntropyError += expOut*log10(out);
+                    //printf("%f %f %f\n",expOut,out,log10(out));
+               // }
+               // else if(expOut == 0){
+                 //   curEntropyError += log10(1.0 - out);
+                   // printf("%f %f %f\n",expOut,out,log10(1.0 - out));
+               // }
+            curEntropyError += expOut*log10(out);
+                
+                
+            //}
 
         }
 

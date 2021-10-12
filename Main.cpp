@@ -29,6 +29,19 @@ int main()
 	//net->curTrainingSet = 1;
 	//net->forwardProp();	
 	//net->loadCurTrainingSet();
+//	net->outputLayer->output[0] = 0.2698;
+	//net->outputLayer->output[1] = 0.3223;
+//	net->outputLayer->output[2] = 0.4078;
+
+	//net->outputLayer->input[0] = 1.8658;
+	//net->outputLayer->input[1] = 2.2292;
+	//net->outputLayer->input[2] = 2.8204;
+
+	
+	
+	//net->compError();
+	//net->crossEntropyError = 0.985;
+	net->backProp();
 	net->printNetwork();
 	
 	//Layer* layer = new Layer(0, 2, "Null");
