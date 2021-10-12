@@ -16,12 +16,15 @@ int main()
 	// ---------------------------------- Initialize Graphics Objs --------------------------------------
 	// Create our net and give it to our nehlper
 	NNet* net = new NNet();
-	net->loadNetFromFile("data/simple.top");
-	net->loadTrainingFromFile("data/simple.training");
+	net->loadNetFromFile("data/very_simple.top");
+	net->loadTrainingFromFile("data/very_simple.training");
 	//net->randomizeWeights(1,1);
 	
+	net->forwardProp();
+	
 
-	net->trainOverSet(200, true);	
+
+	//net->trainOverSet(200, true);	
 
 	//net->curTrainingSet = 1;
 	//net->forwardProp();	

@@ -26,19 +26,49 @@ Layer::Layer(int layerNum, int numNodes, string actvFunc){
     gradInput = NULL;
 
     gradWeights = NULL;
+    bias = 1;
     
 
 }
 
 void Layer::procActvFunc(){
-    for(int i = 0; i < numNodes; i++){
-        if(actvFunc == "Sigmoid"){
+
+    if(actvFunc == "Sigmoid"){
+        
+        for(int i = 0; i < numNodes; i++){
             output[i] =  sigmoid(input[i]);
         }
-
+            
     }
+    else if(actvFunc == "Relu"){
+      
+        for(int i = 0; i < numNodes; i++){
+            output[i] =  relu(input[i]);
+        }
+            
+    }
+    else if(actvFunc == "Softmax"){
+        double expSum = 0;
+        
+        for(int i = 0; i < numNodes; i++){
+            expSum += exp(input[i]);
+        }
+        for(int i = 0; i < numNodes; i++){
+            output[i] = exp(input[i])/expSum;
+        }
+    }
+   
 }
 
+double Layer::relu(double x){
+    if(x > 0){
+        return x;
+    }
+    else{
+        return 0;
+    }
+
+}
 double Layer::sigmoid(double x){
     double result = 0;
 

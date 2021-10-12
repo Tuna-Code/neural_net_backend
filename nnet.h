@@ -26,6 +26,7 @@ class NNet{
 
         double* curSetNodeError;
         double sumSqError;
+        double crossEntropyError;
       
         // Net functions
         NNet();

@@ -24,6 +24,7 @@ NNet::NNet(){
 
     curSetNodeError = NULL;
     sumSqError = 0;
+    crossEntropyError = 0;
 
 }
 
@@ -41,9 +42,10 @@ void NNet::forwardProp(){
             temp->input[i] = 0;
            for(int j = 0; j < temp->prevLayer->numNodes; j++){
                // Current input of node i is previous node j * weight[j][i] in weight matrix
-               temp->input[i] += temp->prevLayer->output[j] * temp->prevLayer->weights[j][i];
+               temp->input[i] += (temp->prevLayer->output[j] * temp->prevLayer->weights[j][i]);
                temp->output[i] = temp->input[i];
            }
+           temp->input[i] += temp->bias;
             // If not input layer, compute weight*input product matrix
            
         }
@@ -232,8 +234,10 @@ void NNet::printNetwork(){
             cout << endl;
             cout << "Network Error on Set:\n------------\n";
             for(int j = 0; j < temp->numNodes; j++){
-                cout <<curSetNodeError[j] << endl;
+                cout << curSetNodeError[j] << endl;
             }
+            cout << "\nCross Entropy Error on Set:\n------------\n";
+            cout << crossEntropyError << endl;
         }
         
         cout << "\n********************\n";
@@ -244,11 +248,35 @@ void NNet::printNetwork(){
 void NNet::compError(){
     Layer* output = outputLayer;
     double curError = 0;
-    
-    for(int i = 0; i < output->num; i++){
-        curError = expectedOutput[i] - output->output[i];
-        curSetNodeError[i] = curError;
+
+    double out = 0;
+    double expOut = 0;
+    double curEntropyError = 0;
+
+    if(errorFunc == "SOS"){
+        for(int i = 0; i < output->numNodes; i++){
+            curError = expectedOutput[i] - output->output[i];
+            curSetNodeError[i] = curError;
+        }
     }
+    else if(errorFunc == "CE"){
+        for(int i = 0; i < output->numNodes; i++){
+            curError = expectedOutput[i] - output->output[i];
+            curSetNodeError[i] = curError;
+
+            expOut = expectedOutput[i];
+            out = output->output[i];
+            
+            curEntropyError = (expOut*log10(out)) + ((1 - expOut)*log((1 - out)));
+            cout << curEntropyError << endl;
+
+        }
+
+        curEntropyError *= -1;
+        //curEntropyError /= output->numNodes;
+        crossEntropyError = curEntropyError;
+    }
+
 
 
 }

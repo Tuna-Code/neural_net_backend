@@ -29,5 +29,6 @@ class Layer{
         void procActvFunc();
 
         double sigmoid(double input);
+        double relu(double input);
         double sigmoidDeriv(double input);
 };
