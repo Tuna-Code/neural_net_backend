@@ -72,9 +72,12 @@ void NNet::backProp(){
                 
                 for(int i = 0; i < cur->prevLayer->numNodes; i++){
                     for(int j = 0; j < cur->numNodes; j++){
-                        cur->prevLayer->gradWeights[i][j] = (cur->output[j] - expectedOutput[j])*cur->prevLayer->output[i];
+                        cur->gradInput[j] =  cur->output[j] - expectedOutput[j];
+                        cur->prevLayer->gradWeights[i][j] = cur->gradInput[j]*cur->prevLayer->output[i];
+                       // cur->prevLayer->gradWeights[i][j] = (cur->output[j] - expectedOutput[j])*cur->prevLayer->output[i];
                         //cout << cur->prevLayer->gradWeights[i][j] << endl;
-                        cur->prevLayer->weights[i][j] -= (learningRate*cur->prevLayer->gradWeights[i][j]);
+                        cout << (learningRate*cur->prevLayer->gradWeights[i][j]) << endl;
+                        //cur->prevLayer->weights[i][j] -= (learningRate*cur->prevLayer->gradWeights[i][j]);
                     }
 
 

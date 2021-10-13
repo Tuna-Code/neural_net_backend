@@ -41,7 +41,7 @@ int main()
 	
 	//net->compError();
 	//net->crossEntropyError = 0.985;
-	for(int i = 0; i < 10000000; i++){
+	for(int i = 0; i < 1; i++){
 			net->backProp();
 	net->forwardProp();
 	net->clearGradients();
