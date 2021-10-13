@@ -41,7 +41,13 @@ int main()
 	
 	//net->compError();
 	//net->crossEntropyError = 0.985;
-	net->backProp();
+	for(int i = 0; i < 10000000; i++){
+			net->backProp();
+	net->forwardProp();
+	net->clearGradients();
+	}
+
+
 	net->printNetwork();
 	
 	//Layer* layer = new Layer(0, 2, "Null");

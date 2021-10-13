@@ -70,18 +70,14 @@ void NNet::backProp(){
                 
                
                 
-                // Compute gradient out/in
-                // Compute denominator for softmax deriv
-                for(int i = 0; i < cur->numNodes; i++){
-                    cur->gradOutput[i] = -1.0*(expectedOutput[i]/cur->output[i]);
-                    
-                    if(i == cur->numNodes - 1){
-                        cur->gradInput[i] = cur->output[i]*(1 - cur->output[i]);
+                for(int i = 0; i < cur->prevLayer->numNodes; i++){
+                    for(int j = 0; j < cur->numNodes; j++){
+                        cur->prevLayer->gradWeights[i][j] = (cur->output[j] - expectedOutput[j])*cur->prevLayer->output[i];
+                        //cout << cur->prevLayer->gradWeights[i][j] << endl;
+                        cur->prevLayer->weights[i][j] -= (learningRate*cur->prevLayer->gradWeights[i][j]);
                     }
-                    else{
-                        
-                        cur->gradInput[i] = -1*(cur->output[i]*cur->output[cur->numNodes-1]);
-                    }
+
+
                 }
                 
 
@@ -89,7 +85,7 @@ void NNet::backProp(){
 
 
             }
-
+            
         }
 
 
