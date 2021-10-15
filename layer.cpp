@@ -26,7 +26,7 @@ Layer::Layer(int layerNum, int numNodes, string actvFunc){
     gradInput = NULL;
 
     gradWeights = NULL;
-    bias = 1;
+    
     
 
 }

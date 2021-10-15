@@ -13,7 +13,6 @@ class NNet{
         double** trainingOutputs;
         double* expectedOutput;
         int trainingSetsLoaded;
-        bool sumWeightGradients = false;
         int curTrainingSet;
 
         double learningRate;
@@ -36,7 +35,7 @@ class NNet{
         void forwardProp();
         void backProp();
         void clearGradients();
-        void trainOverSet(int epochs, bool sumWeightGradients);
+        void trainOverSet(int epochs);
         void applyWeightGradients();
         void addLayer(int num, int numNodes, string actvFunc);
         void randomizeWeights(double min, double max);

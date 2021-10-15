@@ -20,7 +20,6 @@ NNet::NNet(){
     expectedOutput = NULL;
     trainingSetsLoaded = 0;
     curTrainingSet = 0;
-    sumWeightGradients = false;
 
     curSetNodeError = NULL;
     sumSqError = 0;
@@ -61,6 +60,8 @@ void NNet::backProp(){
     
     while(cur != inputLayer){
 
+        
+
         // Backprop for CE Error and various layers (very-simple site)
         // https://www.ics.uci.edu/~pjsadows/notes.pdf
 
@@ -93,23 +94,6 @@ void NNet::backProp(){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
      /// ---------------- Working simple backprop for sigmoid only and SOS error
 
         //cout <<"\n-----------\n" << "Layer: " << cur-> num << endl;
@@ -134,12 +118,10 @@ void NNet::backProp(){
             // Loop through prev layer weights and compute weight gradient based on current gradient in + prev layer outputs
             for(int i = 0; i < cur->prevLayer->numNodes; i++){
                 for(int j = 0; j < cur->numNodes; j++){
-                    if(sumWeightGradients){
-                        cur->prevLayer->gradWeights[i][j] += cur->gradInput[j]*cur->prevLayer->output[i];
-                    }
-                    else{
-                        cur->prevLayer->gradWeights[i][j] = cur->gradInput[j]*cur->prevLayer->output[i];
-                    }
+                    
+                    cur->prevLayer->gradWeights[i][j] += cur->gradInput[j]*cur->prevLayer->output[i];
+                    
+                    
                    // printf("%f ", cur->prevLayer->gradWeights[i][j]);
                     //cout << cur->prevLayer->gradWeights[i][j] << " ";
                 }
@@ -153,8 +135,8 @@ void NNet::backProp(){
 
 }
 
-void NNet::trainOverSet(int epochs, bool sumGradients){
-    sumWeightGradients = sumGradients;
+void NNet::trainOverSet(int epochs){
+    
   
     
     for(int i = 0; i < epochs; i++){
@@ -162,14 +144,11 @@ void NNet::trainOverSet(int epochs, bool sumGradients){
         for(int j = 0; j < trainingSetsLoaded; j++){
             forwardProp();
             backProp();
-            if(!sumGradients){
-                applyWeightGradients();
-            }
             curTrainingSet++;
         }
-        if(sumGradients){
-            applyWeightGradients();
-        }
+        
+        applyWeightGradients();
+        
         clearGradients();
     }
     curTrainingSet = 0;
@@ -196,7 +175,7 @@ void NNet::applyWeightGradients(){
     while(cur != outputLayer){
         for(int i = 0; i < cur->numNodes; i++){
             for(int j = 0; j < cur->nextLayer->numNodes; j++){
-                cur->weights[i][j] += cur->gradWeights[i][j] * learningRate;
+                cur->weights[i][j] -= cur->gradWeights[i][j] * learningRate;
             }
         }
         cur = cur->nextLayer;
@@ -308,7 +287,7 @@ void NNet::compError(){
 
     if(errorFunc == "SOS"){
         for(int i = 0; i < output->numNodes; i++){
-            curError = expectedOutput[i] - output->output[i];
+            curError = output->output[i] - expectedOutput[i];// - output->output[i];
             curSetNodeError[i] = curError;
         }
     }
