@@ -49,13 +49,31 @@ void Layer::procActvFunc(){
     }
     else if(actvFunc == "Softmax"){
         double expSum = 0;
-        
+        double max = -2000000;
+
         for(int i = 0; i < numNodes; i++){
-            expSum += exp(input[i]);
+            if(input[i] > max){
+                max = input[i];
+            }
+        }
+
+
+        for(int i = 0; i < numNodes; i++){
+            
+            expSum += exp(input[i] - max);
         }
         for(int i = 0; i < numNodes; i++){
-            output[i] = exp(input[i])/expSum;
+           
+            output[i] = exp(input[i] - max)/expSum;
         }
+    }
+
+    else if(actvFunc == "Linear"){
+      
+        for(int i = 0; i < numNodes; i++){
+            output[i] =  input[i];
+        }
+            
     }
    
 }

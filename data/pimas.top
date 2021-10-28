@@ -1,6 +1,5 @@
-#Learning Rate (traditionally betweek 0.01 -> 0.1
-0.05
-
+#Learning Rate (traditionally betweek 0.01 -> 1.0
+0.001
 # Network Loss Function:
 ## Options:
 ### Regression Problem - Mean Squared Error (MSE): 
@@ -18,34 +17,22 @@ CE
 
 ##--------------- How many Nodes per layer -----------------
 # Nodes_Per_Layer:
-[3,3,3,3]
+[8,500,100,2]
 
 
 ##--------------- Which activation function for layer ------
 #Layer_Actv_Funcs:
-[Null,Relu,Sigmoid,Softmax]
+[Null,Sigmoid,Relu,Softmax]
 
 
 ##--------------- Set initial weight matricies for layer ---
 ##----- Assign random initial weights
 #Random_Weights (0 - false, 1 - true, 2 - all ones):
-0
+1
 #Random_Range_Min:
--0.999999
+0
 #Random_Range_Max:
-0.999999
+1
 
 ##----- Manually assign initial weights
-[0.1,0.2,0.3
-0.3,0.2,0.7
-0.4,0.3,0.9]
-
-[0.2,0.3,0.5
-0.3,0.5,0.7
-0.6,0.4,0.8]
-
-[0.1,0.4,0.8
-0.3,0.7,0.2
-0.5,0.2,0.9]
-
-
+[

@@ -24,8 +24,10 @@ class NNet{
         Layer* outputLayer;
 
         double* curSetNodeError;
-        double sumSqError;
+        
+        double sumSqrError;
         double crossEntropyError;
+        double mseError;
       
         // Net functions
         NNet();
@@ -36,11 +38,14 @@ class NNet{
         void backProp();
         void clearGradients();
         void trainOverSet(int epochs);
+        void trainOverSetBatch(int epochs, int batchSize);
         void applyWeightGradients();
+        void applyWeightGradientsBatch(int batchSize);
         void addLayer(int num, int numNodes, string actvFunc);
         void randomizeWeights(double min, double max);
         void compError();
         void printNetwork();
+        void printNetworkError();
 
         //void addLayer(int laye);
 

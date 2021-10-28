@@ -1,5 +1,5 @@
 #Learning Rate (traditionally betweek 0.01 -> 0.1
-0.05
+0.7
 
 # Network Loss Function:
 ## Options:
@@ -9,7 +9,7 @@
 #### Likelihood of example belong to one of two classes, one output node with sigmoid. One class is 1, other is 0
 ### Multi-Class Classification Problem - Cross Entropy/Logarithmic Loss (CE):
 #### Predicting likelihood of example belonging to each class, One node for each class with Softmax activation function
-CE
+SOS
 
 ##--------------- How many Layers in network ---------------
 # Layer_Count:
@@ -18,34 +18,27 @@ CE
 
 ##--------------- How many Nodes per layer -----------------
 # Nodes_Per_Layer:
-[3,3,3,3]
+[10,32,32,1]
 
 
 ##--------------- Which activation function for layer ------
 #Layer_Actv_Funcs:
-[Null,Relu,Sigmoid,Softmax]
+[Null,Relu,Relu,Sigmoid]
 
 
 ##--------------- Set initial weight matricies for layer ---
 ##----- Assign random initial weights
 #Random_Weights (0 - false, 1 - true, 2 - all ones):
-0
+1
 #Random_Range_Min:
 -0.999999
 #Random_Range_Max:
 0.999999
 
 ##----- Manually assign initial weights
-[0.1,0.2,0.3
-0.3,0.2,0.7
-0.4,0.3,0.9]
+[6,-3
+-2,5]
 
-[0.2,0.3,0.5
-0.3,0.5,0.7
-0.6,0.4,0.8]
-
-[0.1,0.4,0.8
-0.3,0.7,0.2
-0.5,0.2,0.9]
-
+[1,-2
+0.25,2]
 

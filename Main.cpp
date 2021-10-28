@@ -16,18 +16,24 @@ int main()
 	// ---------------------------------- Initialize Graphics Objs --------------------------------------
 	// Create our net and give it to our nehlper
 	NNet* net = new NNet();
-	net->loadNetFromFile("data/simple.top");
-	net->loadTrainingFromFile("data/simple.training");
+	net->loadNetFromFile("data/housing.top");
+	net->loadTrainingFromFile("data/housing.training");
 	//net->randomizeWeights(1,1);
 	
 	net->forwardProp();
-	
-
 
 	net->trainOverSet(200);	
+		net->printNetworkError();
 
-	//net->curTrainingSet = 1;
-	//net->forwardProp();	
+	net->curTrainingSet = 1;
+	net->forwardProp();
+	net->printNetworkError();
+//	net->printNetworkError();
+
+	//net->curTrainingSet = 29;
+	//net->forwardProp();
+	//net->printNetworkError();
+	
 	//net->loadCurTrainingSet();
 //	net->outputLayer->output[0] = 0.2698;
 	//net->outputLayer->output[1] = 0.3223;
@@ -43,11 +49,7 @@ int main()
 	//net->crossEntropyError = 0.985;
 	
 
-	net->printNetwork();
-	net->curTrainingSet = 1;
-	net->forwardProp();
-	
-	net->printNetwork();
+
 	//Layer* layer = new Layer(0, 2, "Null");
 	
 	cout << "DONE!";

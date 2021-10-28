@@ -22,8 +22,9 @@ NNet::NNet(){
     curTrainingSet = 0;
 
     curSetNodeError = NULL;
-    sumSqError = 0;
+    sumSqrError = 0;
     crossEntropyError = 0;
+    mseError = 0;
 
 }
 
@@ -32,7 +33,6 @@ void NNet::forwardProp(){
     
     // Load current training data into our input layer and expected output array
     loadCurTrainingSet();
-    
     // Loop through each layer
     while(temp != NULL){
         // Loop through each node in our layer
@@ -42,9 +42,10 @@ void NNet::forwardProp(){
            for(int j = 0; j < temp->prevLayer->numNodes; j++){
                // Current input of node i is previous node j * weight[j][i] in weight matrix
                temp->input[i] += (temp->prevLayer->output[j] * temp->prevLayer->weights[j][i]);
-               temp->output[i] = temp->input[i];
+               
+               //temp->output[i] = temp->input[i];
            }
-           temp->input[i] += temp->bias;
+         //  temp->input[i] += temp->bias;
             // If not input layer, compute weight*input product matrix
            
         }
@@ -58,101 +59,132 @@ void NNet::backProp(){
     Layer* cur = outputLayer;
 
     
+    // Loop through each layer where prev layer has weights
     while(cur != inputLayer){
 
-        
-
-        // Backprop for CE Error and various layers (very-simple site)
-        // https://www.ics.uci.edu/~pjsadows/notes.pdf
-
-        if(errorFunc == "CE"){
-
-            if(cur->actvFunc == "Softmax"){
-                
-               
-                
-                for(int i = 0; i < cur->prevLayer->numNodes; i++){
-                    for(int j = 0; j < cur->numNodes; j++){
-                        cur->gradInput[j] =  cur->output[j] - expectedOutput[j];
-                        cur->prevLayer->gradWeights[i][j] = cur->gradInput[j]*cur->prevLayer->output[i];
-                       // cur->prevLayer->gradWeights[i][j] = (cur->output[j] - expectedOutput[j])*cur->prevLayer->output[i];
-                        //cout << cur->prevLayer->gradWeights[i][j] << endl;
-                        cout << (learningRate*cur->prevLayer->gradWeights[i][j]) << endl;
-                        //cur->prevLayer->weights[i][j] -= (learningRate*cur->prevLayer->gradWeights[i][j]);
-                    }
-
-
-                }
-                
-
-
-
-
-            }
-            
-        }
-
-
-
-     /// ---------------- Working simple backprop for sigmoid only and SOS error
-
-        //cout <<"\n-----------\n" << "Layer: " << cur-> num << endl;
-        // If current layer has sigmoud output
-        if(cur->actvFunc == "Sigmoid" && errorFunc == "SOS"){
-            // Loop through each node
+        // Loop through each node
             for(int i = 0; i < cur->numNodes; i++){
-                // If output layer, gradient output is cimple deriv of error
+
+                // If output layer, gradient output is deriv of error
                 if(cur == outputLayer){
-                    cur->gradOutput[i] = 2*curSetNodeError[i];
+                    // If using sum of square loss function
+                    if(errorFunc == "SOS"){
+                        cur->gradOutput[i] = 2*curSetNodeError[i];
+                    }
+                    // If using Categorical Cross Entropy loss function
+                    else if(errorFunc == "CE"){
+                        cur->gradOutput[i] = -1*(expectedOutput[i]/cur->output[i]);
+                    }
                 }
+                // If not on output layer
                 else{
-                    // cur->gradOutput[i] = cur->nextLayer->gradInput[i];
+                    // Loop through next layer nodes and use their input gradient to compute current gradient of output
                     for(int j = 0; j < cur->nextLayer->numNodes; j++){
+                        // Sum across all connections
                         cur->gradOutput[i] += cur->nextLayer->gradInput[j]*cur->weights[i][j];
                     }
                 }
-                // Compute gradient of output layer inputs
-                
-                cur->gradInput[i] = cur->gradOutput[i] * cur->sigmoidDeriv(cur->input[i]);
+                // Compute gradient of inputs
+
+                // If layer uses sigmoid activation
+                if(cur->actvFunc == "Sigmoid"){
+                    cur->gradInput[i] = cur->gradOutput[i] * cur->sigmoidDeriv(cur->input[i]);
+                }
+                // If layer uses softmax activation
+                else if(cur->actvFunc == "Softmax"){
+                    
+                    cur->gradInput[i] =  cur->output[i] - expectedOutput[i];
+                }
+                // If layer uses Relu activation
+                else if(cur->actvFunc == "Relu"){
+                    if(cur->input[i] <= 0){
+                        cur->gradInput[i] = 0;
+                    }
+                    else{
+                        cur->gradInput[i] =  cur->gradOutput[i];
+                    }
+                   
+                }
+
             }
-            // Loop through prev layer weights and compute weight gradient based on current gradient in + prev layer outputs
+
+             // Loop through prev layer weights and compute weight gradient based on current gradient in + prev layer outputs
             for(int i = 0; i < cur->prevLayer->numNodes; i++){
                 for(int j = 0; j < cur->numNodes; j++){
-                    
+                    // Sum gradients across training set
+                   
                     cur->prevLayer->gradWeights[i][j] += cur->gradInput[j]*cur->prevLayer->output[i];
                     
-                    
-                   // printf("%f ", cur->prevLayer->gradWeights[i][j]);
-                    //cout << cur->prevLayer->gradWeights[i][j] << " ";
                 }
-                //cout << endl;
             }
-        }
-        //cout << "\n---------\n";
-        cur = cur->prevLayer;
+            // Backprop to previous layer and continue
+            cur = cur->prevLayer;
     }
-   
 
 }
 
 void NNet::trainOverSet(int epochs){
-    
-  
-    
+    cout << "\nBeginning Training...\n";
+    // Loop through our desired number of epochs
     for(int i = 0; i < epochs; i++){
+        printf("\nStarting Epoch %i/%i\n",i,epochs);
+        // Start epoch on first training set
         curTrainingSet = 0;
+
+        // Loop through each set
         for(int j = 0; j < trainingSetsLoaded; j++){
+            // Pass set through network and analuze error
             forwardProp();
             backProp();
             curTrainingSet++;
         }
-        
+        // Gradient corrections are summed over the epoch. Apply to our current weights
         applyWeightGradients();
         
+        // Clear out our gradient sums to start the new epich
         clearGradients();
     }
+    // Finished training, load first training set and feed forward
     curTrainingSet = 0;
     forwardProp();
+}
+
+void NNet::trainOverSetBatch(int epochs, int batchSize){
+    int counter = 0;
+    cout << "\nBeginning Training...\n";
+    // Loop through our desired number of epochs
+    
+    for(int i = 0; i < epochs; i++){
+       
+        printf("\nStarting Epoch %i/%i\n",i,epochs);
+        // Start epoch on first training set
+        curTrainingSet = 0;
+
+        // Loop through each set
+        for(int j = 0; j < trainingSetsLoaded; j++){
+            if(counter == batchSize){
+                applyWeightGradientsBatch(batchSize);
+                clearGradients();
+                curTrainingSet++;
+                counter = 0;
+            }
+            // Pass set through network and analuze error
+            forwardProp();
+            backProp();
+            curTrainingSet++;
+            counter++;
+        }
+        // Gradient corrections are summed over the epoch. Apply to our current weights
+        applyWeightGradientsBatch(batchSize);
+        
+        // Clear out our gradient sums to start the new epich
+        clearGradients();
+    }
+    // Finished training, load first training set and feed forward
+    curTrainingSet = 0;
+    forwardProp();
+
+
 }
 
 void NNet::clearGradients(){
@@ -175,7 +207,23 @@ void NNet::applyWeightGradients(){
     while(cur != outputLayer){
         for(int i = 0; i < cur->numNodes; i++){
             for(int j = 0; j < cur->nextLayer->numNodes; j++){
-                cur->weights[i][j] -= cur->gradWeights[i][j] * learningRate;
+                cur->weights[i][j] -= (cur->gradWeights[i][j]/trainingSetsLoaded) * learningRate;
+            }
+        }
+        cur = cur->nextLayer;
+    }
+
+
+
+}
+
+void NNet::applyWeightGradientsBatch(int batchSize){
+    Layer* cur = inputLayer;
+
+    while(cur != outputLayer){
+        for(int i = 0; i < cur->numNodes; i++){
+            for(int j = 0; j < cur->nextLayer->numNodes; j++){
+                cur->weights[i][j] -= (cur->gradWeights[i][j] * learningRate);
             }
         }
         cur = cur->nextLayer;
@@ -277,6 +325,32 @@ void NNet::printNetwork(){
     }
 }
 
+void NNet::printNetworkError(){
+    Layer* temp = outputLayer;
+    cout << "Network Error Func: " << errorFunc << endl;
+    cout << "Network Learning Rate: " << learningRate << endl;
+    cout << "Training Sets Loaded: " << trainingSetsLoaded << endl;
+    cout << "Current Training Set: " << (curTrainingSet + 1) << endl << endl;
+
+    cout << "\n\n--------- Network Error Analysis -----------\n\nNetwork Outputs:\n-----\n";
+    for(int j = 0; j < temp->numNodes; j++){
+        cout << temp->output[j] << endl;
+    }
+    cout << endl;
+    cout << "Expected Outputs:\n------------\n";
+    for(int j = 0; j < temp->numNodes; j++){
+        cout << expectedOutput[j] << endl;
+    }
+    cout << endl;
+    cout << "Network Error on Set:\n------------\n";
+    for(int j = 0; j < temp->numNodes; j++){
+        cout << curSetNodeError[j] << endl;
+    }
+    cout << "\nCross Entropy Error on Set:\n------------\n";
+    cout << crossEntropyError << endl;
+
+
+}
 void NNet::compError(){
     Layer* output = outputLayer;
     double curError = 0;
@@ -284,17 +358,28 @@ void NNet::compError(){
     double out = 0;
     double expOut = 0;
     double curEntropyError = 0;
+    double sumSqError = 0;
+
+    for(int i = 0; i < output->numNodes; i++){
+            curError = output->output[i] - expectedOutput[i];// - output->output[i];
+            curSetNodeError[i] = curError;
+           // cout << expectedOutput[i] << endl;
+    }
 
     if(errorFunc == "SOS"){
         for(int i = 0; i < output->numNodes; i++){
-            curError = output->output[i] - expectedOutput[i];// - output->output[i];
-            curSetNodeError[i] = curError;
+            sumSqError += (curSetNodeError[i]*curSetNodeError[i]);
         }
+        sumSqrError = sumSqError;
+    }
+    else if(errorFunc == "MSE"){
+        for(int i = 0; i < output->numNodes; i++){
+            sumSqError += (curSetNodeError[i]*curSetNodeError[i]);
+        }
+        mseError = sumSqError / output->numNodes;
     }
     else if(errorFunc == "CE"){
         for(int i = 0; i < output->numNodes; i++){
-            curError = expectedOutput[i] - output->output[i];
-            curSetNodeError[i] = curError;
 
             expOut = expectedOutput[i];
             out = output->output[i];
@@ -311,6 +396,7 @@ void NNet::compError(){
                  //   curEntropyError += log10(1.0 - out);
                    // printf("%f %f %f\n",expOut,out,log10(1.0 - out));
                // }
+            
             curEntropyError += expOut*log10(out);
                 
                 
@@ -327,7 +413,6 @@ void NNet::compError(){
 
 }
 void NNet::addLayer(int num, int numNodes, string actvFunc){
-
     Layer* newLayer = new Layer(num, numNodes, actvFunc);
 
 
@@ -520,11 +605,29 @@ void NNet::loadNetFromFile(string path){
                 }
                 else if(curInputPos == 3){
                     layerCounter = 0;
-                    for(string::size_type i = 0; i < curLine.size(); i++){
-                        if(curLine[i] != '[' && curLine[i] != ']' && curLine[i] != ' ' && curLine[i] != ','){
-                            nodesPerLayer[layerCounter] = (int) (curLine[i] - 48);
+                    string temp = "";
+                    for(string::size_type i = 1; i < curLine.size(); i++){
+                       /* if(curLine[i] != '[' && curLine[i] != ']' && curLine[i] != ' ' && curLine[i] != ','){
+                            cout << curLine[i] << endl;
+                            //nodesPerLayer[layerCounter] = (int) (curLine[i] - 48);
                             layerCounter++;
-                        }
+                        }*/
+                        if(curLine[i] == ',' || curLine[i] == ']'){
+							stringEnd = i;
+                            temp = curLine.substr(stringStart,stringEnd-stringStart);
+							//layerActvFunc[layerCounter] = curLine.substr(stringStart,stringEnd-stringStart);
+							//layerCounter++;
+                            if(temp.length() == 1){
+                                nodesPerLayer[layerCounter] = (int) (temp[0] - 48);
+                                layerCounter++;
+                            }
+                            else{
+                                nodesPerLayer[layerCounter] = stoi(temp);
+                                layerCounter++;
+                            }
+                            
+							stringStart = stringEnd + 1;
+						}
                     }
                     curInputPos++;
                 }
